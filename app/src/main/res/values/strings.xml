@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">Bin Lookup</string>
+    <string name="empty">History is empty</string>
+    <string name="query_history">Query history</string>
+    <string name="enter_bin">Enter BIN</string>
+    <string name="search">Search</string>
+    <string name="welcome_text">Welcome to Bin Lookup!</string>
+    <string name="on_map">on map</string>
+    <string name="location">"Location: "</string>
+    <string name="no_bank_info">No information about this bank</string>
+    <string name="bank_name">Bank name: %s</string>
+    <string name="url">"URL: "</string>
+    <string name="telephone">"Telephone: "</string>
 </resources>
