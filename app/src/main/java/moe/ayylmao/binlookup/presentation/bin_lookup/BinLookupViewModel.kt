@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import moe.ayylmao.binlookup.domain.model.BinQuery
 import moe.ayylmao.binlookup.domain.repository.BinQueryRepository
 import moe.ayylmao.binlookup.domain.repository.BinlistRepository
+import moe.ayylmao.binlookup.presentation.bin_lookup.components.QueryInputFieldState
 import moe.ayylmao.binlookup.util.NetworkResult
 import javax.inject.Inject
 
@@ -24,6 +25,9 @@ class BinLookupViewModel @Inject constructor(
 ) : ViewModel() {
     private val _state = mutableStateOf(BinLookupState())
     val state: State<BinLookupState> = _state
+
+    private val _inputFieldState = mutableStateOf(QueryInputFieldState())
+    val inputFieldState: State<QueryInputFieldState> = _inputFieldState
 
     val queries = binQueryRepository.getQueries()
 
@@ -41,8 +45,7 @@ class BinLookupViewModel @Inject constructor(
         getQueriesJob = binQueryRepository.getQueries()
             .onEach { queries ->
                 _state.value = state.value.copy(
-                    queries = queries,
-                    inputQueryText = state.value.inputQueryText
+                    queries = queries
                 )
             }
             .launchIn(viewModelScope)
@@ -51,14 +54,20 @@ class BinLookupViewModel @Inject constructor(
     fun onEvent(event: BinLookupEvent) {
         when (event) {
             is BinLookupEvent.EnteredQuery -> {
-                _state.value = _state.value.copy(
-                    queries = state.value.queries,
-                    inputQueryText = event.query
+                val isValid = validateBinInputLength(event.query)
+                _inputFieldState.value = inputFieldState.value.copy(
+                    inputQueryText = event.query,
+                    isValid = isValid
                 )
             }
             is BinLookupEvent.MakeQuery -> {
+                if (!inputFieldState.value.isValid) {
+                    return
+                }
+
                 viewModelScope.launch {
-                    when (val result = binlistRepository.getBankInfo(state.value.inputQueryText)) {
+                    val query = inputFieldState.value.inputQueryText
+                    when (val result = binlistRepository.getBankInfo(query)) {
                         is NetworkResult.Error -> {
                             _eventFlow.emit(UiEvent.ShowSnackBar(result.message ?: "Error"))
                         }
@@ -72,14 +81,13 @@ class BinLookupViewModel @Inject constructor(
 
                             binQueryRepository.insertQuery(
                                 BinQuery(
-                                    bin = state.value.inputQueryText,
+                                    bin = query,
                                     bankName = bankName
                                 )
                             )
 
                             _state.value = state.value.copy(
                                 queries = state.value.queries,
-                                inputQueryText = state.value.inputQueryText,
                                 queryResult = result.data
                             )
                         }
@@ -87,6 +95,13 @@ class BinLookupViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun validateBinInputLength(input: String): Boolean {
+        val binMinLength = 4
+        val binMaxLength = 6
+
+        return input.length in binMinLength..binMaxLength
     }
 
     sealed class UiEvent {

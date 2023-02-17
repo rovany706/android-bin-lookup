@@ -12,4 +12,5 @@
     <string name="bank_name">Название банка: %s</string>
     <string name="url">"Сайт: "</string>
     <string name="telephone">"Телефон: "</string>
+    <string name="bin_query_format_error">Длина BIN должна быть от 4 до 6 символов</string>
 </resources>

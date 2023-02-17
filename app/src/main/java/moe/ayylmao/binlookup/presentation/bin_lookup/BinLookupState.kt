@@ -5,6 +5,5 @@ import moe.ayylmao.binlookup.domain.model.binlist.BinlistResponse
 
 data class BinLookupState(
     val queries: List<BinQuery> = emptyList(),
-    val inputQueryText: String = "",
     val queryResult: BinlistResponse? = null
 )

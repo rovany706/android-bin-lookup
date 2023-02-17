@@ -4,7 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -18,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import moe.ayylmao.binlookup.R
@@ -36,10 +36,6 @@ fun BinLookupScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
 
     fun makeQuery() {
-        if (state.inputQueryText.isBlank()) {
-            return
-        }
-
         keyboardController?.hide()
         viewModel.onEvent(BinLookupEvent.MakeQuery)
     }
@@ -72,22 +68,7 @@ fun BinLookupScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    OutlinedTextField(
-                        modifier = Modifier.weight(1f),
-                        value = state.inputQueryText,
-                        onValueChange = {
-                            val filtered = it.filter { symbol -> symbol.isDigit() }
-                            viewModel.onEvent(BinLookupEvent.EnteredQuery(filtered))
-                        },
-                        placeholder = { Text(text = stringResource(R.string.enter_bin)) },
-                        keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Done,
-                            keyboardType = KeyboardType.Number
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onDone = { makeQuery() }
-                        )
-                    )
+                    BinQueryField(viewModel = viewModel, modifier = Modifier.weight(1f))
                     IconButton(onClick = { makeQuery() }) {
                         Icon(
                             imageVector = Icons.Default.ArrowForward,
@@ -134,6 +115,36 @@ fun BinLookupScreen(
                         })
                 Spacer(modifier = Modifier.height(8.dp))
             }
+        }
+    }
+}
+
+@Composable
+fun BinQueryField(viewModel: BinLookupViewModel, modifier: Modifier = Modifier) {
+    val inputFieldState = viewModel.inputFieldState.value
+
+    Column(modifier = modifier) {
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = inputFieldState.inputQueryText,
+            onValueChange = {
+                val filtered = it.filter { symbol -> symbol.isDigit() }
+                viewModel.onEvent(BinLookupEvent.EnteredQuery(filtered))
+            },
+            placeholder = { Text(text = stringResource(R.string.enter_bin)) },
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done,
+                keyboardType = KeyboardType.Number
+            ),
+            isError = !inputFieldState.isValid
+        )
+        if (!inputFieldState.isValid) {
+            Text(
+                text = stringResource(R.string.bin_query_format_error),
+                modifier = Modifier.padding(start = 8.dp),
+                fontSize = 14.sp,
+                color = MaterialTheme.colors.error
+            )
         }
     }
 }
