@@ -1,4 +1,4 @@
-package moe.ayylmao.binlookup.presentation.bin_lookup.components
+package moe.ayylmao.binlookup.presentation.bin_lookup
 
 data class QueryInputFieldState(
     val inputQueryText: String = "",

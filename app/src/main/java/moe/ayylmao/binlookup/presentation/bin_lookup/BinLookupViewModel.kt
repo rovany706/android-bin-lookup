@@ -14,7 +14,6 @@ import kotlinx.coroutines.launch
 import moe.ayylmao.binlookup.domain.model.BinQuery
 import moe.ayylmao.binlookup.domain.repository.BinQueryRepository
 import moe.ayylmao.binlookup.domain.repository.BinlistRepository
-import moe.ayylmao.binlookup.presentation.bin_lookup.components.QueryInputFieldState
 import moe.ayylmao.binlookup.util.NetworkResult
 import javax.inject.Inject
 
